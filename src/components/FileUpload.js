@@ -1,39 +1,64 @@
-import React, { useRef, useState } from 'react';
-import { FileUp } from 'lucide-react';
+// src/components/FileUpload.jsx
 import { useApp } from '../context/AppContext';
-
+import Papa from 'papaparse';
 
 export default function FileUpload() {
-const ref = useRef(null);
-const [drag, setDrag] = useState(false);
-const { setDatasetName } = useApp();
+  const { setDatasetName, setDatasetColumns } = useApp();
+  const { uploadedFile, setUploadedFile } = useApp();
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.name.endsWith('.csv')) {
+        alert('Please upload a valid CSV file.');
+        return;
+      }
+      setUploadedFile(file);
 
-const handle = (files) => {
-if (!files || !files.length) return;
-const f = files[0];
-if (!f.name.match(/\.(csv|xlsx|xls)$/i)) {
-alert('Only CSV or Excel files are allowed');
-return;
-}
-setDatasetName(f.name);
-};
+      // Update dataset name
+      setDatasetName(file.name);
 
+      // Parse CSV file to extract column names
+      Papa.parse(file, {
+        header: true, // Treat first row as headers
+        skipEmptyLines: true,
+        complete: (result) => {
+          // Extract column names from the parsed data
+          const columns = Object.keys(result.data[0] || {});
+          if (columns.length === 0) {
+            console.error('No valid columns found in the dataset.');
+            alert('No valid columns found in the dataset. Please ensure the CSV has a header row.');
+            setDatasetColumns([]);
+          } else {
+            console.log('Extracted columns:', columns);
+            setDatasetColumns(columns); // Update context with column names
+          }
+        },
+        error: (error) => {
+          console.error('Error parsing CSV:', error);
+          alert('Error parsing CSV file. Please check the file format.');
+          setDatasetColumns([]);
+        },
+      });
+    }
+  };
 
-return (
-<div
-onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
-onDragLeave={() => setDrag(false)}
-onDrop={(e) => { e.preventDefault(); setDrag(false); handle(e.dataTransfer.files); }}
-className={`border-2 border-dashed rounded-2xl p-8 mx-auto ${drag ? 'border-slate-400 bg-slate-50' : 'border-slate-300 bg-white'}`} style={{ maxWidth: 720 }}
->
-<div className="grid place-items-center gap-3">
-<FileUp />
-<div className="text-lg font-medium">Drag your dataset here or browse your files</div>
-<div className="text-xs text-slate-500">CSV or Excel only</div>
-<input ref={ref} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={(e) => handle(e.target.files)} />
-<button onClick={() => ref.current?.click()} className="mt-2 px-4 py-2 rounded-xl bg-[#1A6B8E] text-white">Browse Files</button>
-</div>
-</div>
-);
+  return (
+    <div>
+      <label
+        htmlFor="fileUpload"
+        className="block text-sm font-medium text-slate-700 mb-2"
+      >
+        Upload Dataset (CSV)
+      </label>
+      <input
+        id="fileUpload"
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A6B8E] focus:border-transparent"
+      />
+    </div>
+  );
 }
