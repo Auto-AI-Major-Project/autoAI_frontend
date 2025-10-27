@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8000';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
 
 export default function SignIn() {
   const nav = useNavigate();
@@ -25,7 +25,7 @@ export default function SignIn() {
     }
 
     try {
-      const response = await axios.post(`${BASE_URL}/auth/signin`, formData);
+      const response = await axios.post(`${BASE_URL}/api/auth/signin`, formData);
       localStorage.setItem('token', response.data.token); 
       setSuccess('Signed in successfully!');
       setTimeout(() => nav('/'), 1500); 

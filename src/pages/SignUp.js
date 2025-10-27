@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8000';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
 
 export default function SignUp() {
   const nav = useNavigate();
@@ -32,7 +32,7 @@ export default function SignUp() {
     }
 
     try {
-      const response = await axios.post(`${BASE_URL}/auth/signup`, formData);
+      const response = await axios.post(`${BASE_URL}/api/auth/signup`, formData);
       localStorage.setItem('token', response.data.token); // Store JWT token
       setSuccess('Account created successfully!');
       setTimeout(() => nav('/'), 1500); // Redirect after 1.5s

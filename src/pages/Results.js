@@ -289,7 +289,8 @@
 
 import { useApp } from '../context/AppContext';
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom'; 
+
 
 export default function Results() {
   const {
@@ -308,6 +309,7 @@ export default function Results() {
   const [error, setError] = useState(null);
   
   const location = useLocation();
+  const navigate = useNavigate(); 
   const runId = location.state?.runId; // Get runId if passed via navigation
 
   const getAuthToken = () => {
@@ -380,6 +382,96 @@ export default function Results() {
       fetchAllRuns();
     }
   }, [runId, modelResults]);
+
+  const handleDownloadModel = async () => {
+  if (!displayResults || !displayResults.run_id) {
+    alert('No model available to download');
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:8000/automl/download-model/${displayResults.run_id}`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to download model');
+    }
+
+    // Get the filename from the response headers
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = 'model.pkl';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    // Create blob and download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Error downloading model:', error);
+    alert('Failed to download model. Please try again.');
+  }
+};
+
+const handleExportResults = async () => {
+  if (!displayResults || !displayResults.run_id) {
+    alert('No results available to export');
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+    
+    const response = await fetch(
+      `http://localhost:8000/automl/export-results/${displayResults.run_id}`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to export results');
+    }
+
+    // Get the filename from the response headers
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = `AutoML_Results_Run${displayResults.run_id}.xlsx`;
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    // Create blob and download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    // Optional: Show success message
+    alert('Results exported successfully!');
+    
+  } catch (error) {
+    console.error('Error exporting results:', error);
+    alert('Failed to export results. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Determine which results to display
   const displayResults = modelResults || fetchedResults;
@@ -623,13 +715,27 @@ export default function Results() {
 
         {/* Action Buttons */}
         <div className="mt-8 flex gap-3 flex-wrap">
-          <button className="px-4 py-2 bg-[#1A6B8E] text-white rounded-lg hover:bg-[#155a7a] transition-colors">
+          <button
+          onClick={handleDownloadModel}
+          disabled={!displayResults?.run_id}
+          className="px-4 py-2 bg-[#1A6B8E] text-white rounded-lg hover:bg-[#155a7a] transition-colors">
             Download Best Model
           </button>
-          <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
-            Export Results
+          <button 
+            onClick={handleExportResults}
+            disabled={!displayResults?.run_id || isLoading}
+            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:bg-gray-200 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Exporting...' : 'Export Results'}
           </button>
-          <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+          <button
+          onClick={() => navigate('/visual-analysis', { 
+            state: { 
+              targetColumn: displayResults.target_column,
+              filename: displayResults.filename 
+            } 
+          })}
+          className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
             Go to Visual Analysis
           </button>
           <button 

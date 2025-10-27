@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Pencil, LogOut, Check, X } from 'lucide-react';
 import axios from 'axios';
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8000';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
 
 // Move Field component outside to prevent recreation
 const Field = React.memo(({ id, label, type = 'text', editing, value, onChange }) => (

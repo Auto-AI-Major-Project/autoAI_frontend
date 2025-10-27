@@ -14,6 +14,7 @@ import ContactUs from './pages/ContactUs';
 import AboutUs from './pages/AboutUs';
 import Profile from './pages/Profile';
 import AutoML from './pages/AutoML';
+import VisualAnalysis from './components/VisualAnalysis';
 
 
 export default function App() {
@@ -36,6 +37,7 @@ return (
 <Route path="/about" element={<AboutUs />} />
 <Route path="/profile" element={<Profile />} />
 <Route path="/automl" element={<AutoML />} />
+<Route path="/visual-analysis" element={<VisualAnalysis />} />
 </Routes>
 </div>
 <Footer />
