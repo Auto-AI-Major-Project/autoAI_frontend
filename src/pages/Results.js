@@ -320,8 +320,12 @@ export default function Results() {
   const fetchAllRuns = async () => {
     try {
       const token = getAuthToken();
-      setIsLoading(true);
-      const response = await fetch('http://localhost:8000/automl/runs');
+      setIsLoading(true); 
+      const response = await fetch('http://localhost:8000/automl/runs', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch runs');
       const data = await response.json();
       setAllRuns(data.runs || []);
@@ -344,7 +348,11 @@ export default function Results() {
     try {
       const token = getAuthToken();
       setIsLoading(true);
-      const response = await fetch(`http://localhost:8000/automl/runs/${id}`);
+      const response = await fetch(`http://localhost:8000/automl/runs/${id}` ,{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch run details');
       const data = await response.json();
       

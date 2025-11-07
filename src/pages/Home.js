@@ -196,6 +196,7 @@ export default function Home() {
 
     try {
       // Create FormData for the API call
+      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', uploadedFile);
       formData.append('target_col', targetColumn);
@@ -203,7 +204,10 @@ export default function Home() {
       // Call FastAPI endpoint
       const response = await fetch('http://localhost:8000/automl', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`  // ✅ include token
+        },
+        body: formData
       });
 
       if (!response.ok) {
