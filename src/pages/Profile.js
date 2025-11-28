@@ -275,9 +275,9 @@ export default function Profile() {
             />
           </label>
         </div>
-        <button className="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-50 transition-colors">
+        {/* <button className="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-50 transition-colors">
           View Previous Projects
-        </button>
+        </button> */}
       </div>
     </div>
   );
