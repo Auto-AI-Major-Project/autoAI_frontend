@@ -30,6 +30,9 @@ export function AppProvider({ children }) {
     company: 'MIT College, Chh. Sambhajinagar',
   });
 
+  const [cleaningResults, setCleaningResults] = useState(null);
+  const [cleaningInspection, setCleaningInspection] = useState(null);
+
   const downloadFile = (filename, content, mime = 'text/plain') => {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
@@ -86,6 +89,10 @@ export function AppProvider({ children }) {
         setUploadedFile,
         modelResults,
         setModelResults,
+        cleaningResults,
+        setCleaningResults,
+        cleaningInspection,
+        setCleaningInspection,
       }}
     >
       {children}
